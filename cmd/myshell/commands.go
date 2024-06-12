@@ -32,6 +32,10 @@ func (e *ExitCommand) Exec(args []string) error {
 	return nil
 }
 
+func (e *ExitCommand) Type() string {
+	return "builtin"
+}
+
 type EchoCommand struct {
 	name string
 }
@@ -42,6 +46,10 @@ func NewEchoCommand() *EchoCommand {
 
 func (e *EchoCommand) Name() string {
 	return e.name
+}
+
+func (e *EchoCommand) Type() string {
+	return "builtin"
 }
 
 func (e *EchoCommand) Exec(args []string) error {
@@ -68,6 +76,28 @@ func (tc *TypeCommand) Name() string {
 	return "type"
 }
 
+func (e *TypeCommand) Type() string {
+	return "builtin"
+}
+
 func (tc *TypeCommand) Exec(_ []string) error {
+	return nil
+}
+
+type ExternalCommand struct {
+	name    string
+	binPath string
+}
+
+func (ex *ExternalCommand) Name() string {
+	return ex.name
+}
+
+func (e *ExternalCommand) Type() string {
+	return e.binPath
+}
+
+func (ex *ExternalCommand) Exec(args []string) error {
+	// TODO: execute the command
 	return nil
 }

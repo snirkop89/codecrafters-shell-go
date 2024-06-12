@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"os/exec"
 	"os/signal"
 	"strings"
 )
@@ -18,6 +19,7 @@ var (
 type cmd interface {
 	Name() string
 	Exec(args []string) error
+	Type() string
 }
 
 func main() {
@@ -86,19 +88,33 @@ func runCommand(commands []cmd, command string, args []string) {
 		command = args[0]
 	}
 
+	// Check for builtin commands
 	for _, cmd := range commands {
 		if cmd.Name() == command {
 			execCmd = cmd
 			break
 		}
 	}
+	// Fallback for external command
+	if execCmd == nil {
+		cmd, err := exec.LookPath(command)
+		if err == nil {
+			execCmd = &ExternalCommand{name: command, binPath: cmd}
+		}
+	}
+
 	if execCmd == nil {
 		fmt.Fprintf(os.Stdout, "%s: not found\n", command)
 		return
 	}
-	// type is a unique command of reflectio kind.
+
+	// type is a unique command of reflect a command
 	if reflect {
-		fmt.Fprintf(os.Stdout, "%s is a shell builtin\n", args[0])
+		if execCmd.Type() == "builtin" {
+			fmt.Fprintf(os.Stdout, "%s is a shell builtin\n", args[0])
+		} else {
+			fmt.Fprintf(os.Stdout, "%s is %s\n", args[0], execCmd.Type())
+		}
 		return
 	}
 
