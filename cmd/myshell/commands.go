@@ -1,13 +1,14 @@
 package main
 
 import (
+	"fmt"
 	"os"
 	"strconv"
+	"strings"
 )
 
 type ExitCommand struct {
 	name string
-	args []string
 }
 
 func NewExitCommand() *ExitCommand {
@@ -29,4 +30,34 @@ func (e *ExitCommand) Exec(args []string) error {
 	os.Exit(code)
 
 	return nil
+}
+
+type EchoCommand struct {
+	name string
+}
+
+func NewEchoCommand() *EchoCommand {
+	return &EchoCommand{name: "echo"}
+}
+
+func (e *EchoCommand) Name() string {
+	return "echo"
+}
+
+func (e *EchoCommand) Exec(args []string) error {
+	msg := args
+	newLine := true
+	if len(args) > 0 && args[0] == "-n" {
+		msg = msg[1:]
+		newLine = false
+	}
+
+	smsg := strings.Join(msg, " ")
+	if newLine {
+		_, err := fmt.Fprintln(os.Stderr, smsg)
+		return err
+	}
+
+	_, err := fmt.Fprint(os.Stderr, smsg)
+	return err
 }

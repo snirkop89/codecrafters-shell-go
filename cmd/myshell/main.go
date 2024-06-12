@@ -25,7 +25,10 @@ func main() {
 	defer cancel()
 
 	input := readInput()
-	commands := []cmd{NewExitCommand()}
+	commands := []cmd{
+		NewExitCommand(),
+		NewEchoCommand(),
+	}
 
 outer:
 	for {
