@@ -2,20 +2,39 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"fmt"
 	"os"
-	"strings"
+	"os/signal"
 )
 
 func main() {
-	// Uncomment this block to pass the first stage
-	fmt.Fprint(os.Stdout, "$ ")
+	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
+	defer cancel()
 
-	// Wait for user input
-	command, err := bufio.NewReader(os.Stdin).ReadString('\n')
-	if err != nil {
-		fmt.Fprintln(os.Stderr, "unexpected error")
+	input := readInput()
+
+outer:
+	for {
+		fmt.Fprint(os.Stdout, "$ ")
+		select {
+		case <-ctx.Done():
+			break outer
+		case command := <-input:
+			fmt.Fprintf(os.Stdout, "%s: command not found\n", command)
+		}
 	}
-	command = strings.TrimSpace(command)
-	fmt.Fprintf(os.Stdout, "%s: command not found\n", command)
+	fmt.Fprintln(os.Stdout, "quiting...")
+}
+
+func readInput() <-chan string {
+	scanner := bufio.NewScanner(os.Stdin)
+
+	r := make(chan string)
+	go func() {
+		for scanner.Scan() {
+			r <- scanner.Text()
+		}
+	}()
+	return r
 }
