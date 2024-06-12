@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"os"
+	"os/exec"
 	"strconv"
 	"strings"
 )
@@ -98,6 +99,8 @@ func (e *ExternalCommand) Type() string {
 }
 
 func (ex *ExternalCommand) Exec(args []string) error {
-	// TODO: execute the command
-	return nil
+	cmd := exec.Command(ex.binPath, args...)
+	cmd.Stdin = os.Stdin
+	cmd.Stdout = os.Stderr
+	return cmd.Run()
 }
