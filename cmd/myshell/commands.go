@@ -41,7 +41,7 @@ func NewEchoCommand() *EchoCommand {
 }
 
 func (e *EchoCommand) Name() string {
-	return "echo"
+	return e.name
 }
 
 func (e *EchoCommand) Exec(args []string) error {
@@ -60,4 +60,14 @@ func (e *EchoCommand) Exec(args []string) error {
 
 	_, err := fmt.Fprint(os.Stderr, smsg)
 	return err
+}
+
+type TypeCommand struct{}
+
+func (tc *TypeCommand) Name() string {
+	return "type"
+}
+
+func (tc *TypeCommand) Exec(_ []string) error {
+	return nil
 }
