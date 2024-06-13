@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"path"
 	"strconv"
 	"strings"
 )
@@ -117,21 +118,95 @@ func (cd *CdCommand) Type() string {
 }
 
 func (cd *CdCommand) Exec(args []string) error {
-	var chDir string
-	if len(args) == 0 {
+	// Easy mode
+	// var chDir string
+	// if len(args) == 0 || len(args) == 1 && args[0] == "~" {
+	// 	homeFolder := os.Getenv("HOME")
+	// 	if homeFolder == "" {
+	// 		return fmt.Errorf("could not find HOME dir")
+	// 	}
+	// 	chDir = homeFolder
+	// } else {
+	// 	chDir = args[0]
+	// }
+	// err := os.Chdir(chDir)
+	// if err != nil {
+	// 	return fmt.Errorf("cd: %s: No such file or directory", chDir)
+	// }
+	//
+	switch {
+	case len(args) == 0:
 		homeFolder := os.Getenv("HOME")
 		if homeFolder == "" {
 			return fmt.Errorf("could not find HOME dir")
 		}
-		chDir = homeFolder
-	} else {
-		chDir = args[0]
-	}
-	err := os.Chdir(chDir)
-	if err != nil {
-		return fmt.Errorf("cd: %s: No such file or directory", chDir)
+		err := os.Chdir(homeFolder)
+		if err != nil {
+			return fmt.Errorf("cd: %s: No such file or directory", args[0])
+		}
+
+	case len(args) == 1 && args[0] == "~":
+		homeFolder := os.Getenv("HOME")
+		if homeFolder == "" {
+			return fmt.Errorf("could not find HOME dir")
+		}
+		err := os.Chdir(homeFolder)
+		if err != nil {
+			return fmt.Errorf("cd: %s: No such file or directory", args[0])
+		}
+	default:
+		dir, err := handleRelative(args[0])
+		if err != nil {
+			return fmt.Errorf("cd: %s: No such file or directory", args[0])
+		}
+		err = os.Chdir(dir)
+		if err != nil {
+			return fmt.Errorf("cd: %s: No such file or directory", args[0])
+		}
 	}
 	return nil
+}
+
+func handleRelative(input string) (string, error) {
+	// Absolute path
+	if input[0] == '/' {
+		return input, nil
+	}
+
+	// Relative to current dir
+	if input[0] == '.' && len(input) == 1 {
+		return os.Getwd()
+	} else if len(input) > 1 && input[0] == '.' && input[1] != '.' {
+		cwd, err := os.Getwd()
+		if err != nil {
+			return "", err
+		}
+		return path.Join(cwd, input[1:]), nil
+	}
+
+	if len(input) > 1 {
+		idx := strings.Index(input, "/")
+		isPrev := input[0] == '.' && input[1] == '.'
+
+		if isPrev && idx == -1 {
+			tdir, err := os.Getwd()
+			if err != nil {
+				return "", err
+			}
+			prev := path.Dir(tdir)
+			return prev, nil
+		} else if isPrev && idx > 2 {
+			tdir, err := os.Getwd()
+			if err != nil {
+				return "", err
+			}
+			prev := path.Dir(tdir)
+			return path.Join(prev, input[2:]), nil
+		}
+
+	}
+
+	return input, nil
 }
 
 type ExternalCommand struct {
