@@ -85,6 +85,27 @@ func (tc *TypeCommand) Exec(_ []string) error {
 	return nil
 }
 
+// Worked out of the box since I have the lookup in path,
+// but for fun, I'll implement it myself.
+type PwdCommand struct{}
+
+func (pc *PwdCommand) Name() string {
+	return "pwd"
+}
+
+func (pc *PwdCommand) Exec(_ []string) error {
+	dir, err := os.Getwd()
+	if err != nil {
+		return err
+	}
+	fmt.Fprintln(os.Stdout, dir)
+	return nil
+}
+
+func (pc *PwdCommand) Type() string {
+	return "builtin"
+}
+
 type ExternalCommand struct {
 	name    string
 	binPath string
