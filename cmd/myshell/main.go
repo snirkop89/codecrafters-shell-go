@@ -30,6 +30,8 @@ func main() {
 	commands := []cmd{
 		NewExitCommand(),
 		NewEchoCommand(),
+		&PwdCommand{},
+		&CdCommand{},
 		&TypeCommand{},
 	}
 
@@ -42,7 +44,7 @@ outer:
 		case userInput := <-input:
 			userCmd, args, err := extractCommand(userInput)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
+				fmt.Fprintln(os.Stderr, err)
 				continue
 			}
 			runCommand(commands, userCmd, args)
@@ -119,6 +121,6 @@ func runCommand(commands []cmd, command string, args []string) {
 	}
 
 	if err := execCmd.Exec(args); err != nil {
-		fmt.Fprintf(os.Stderr, "ERROR: %v\n", err)
+		fmt.Fprintln(os.Stderr, err)
 	}
 }

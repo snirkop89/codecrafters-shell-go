@@ -106,6 +106,34 @@ func (pc *PwdCommand) Type() string {
 	return "builtin"
 }
 
+type CdCommand struct{}
+
+func (cd *CdCommand) Name() string {
+	return "cd"
+}
+
+func (cd *CdCommand) Type() string {
+	return "builtin"
+}
+
+func (cd *CdCommand) Exec(args []string) error {
+	var chDir string
+	if len(args) == 0 {
+		homeFolder := os.Getenv("HOME")
+		if homeFolder == "" {
+			return fmt.Errorf("could not find HOME dir")
+		}
+		chDir = homeFolder
+	} else {
+		chDir = args[0]
+	}
+	err := os.Chdir(chDir)
+	if err != nil {
+		return fmt.Errorf("cd: %s: No such file or directory", chDir)
+	}
+	return nil
+}
+
 type ExternalCommand struct {
 	name    string
 	binPath string
