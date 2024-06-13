@@ -9,6 +9,8 @@ import (
 	"strings"
 )
 
+const builtin = "builtin"
+
 type ExitCommand struct {
 	name string
 }
@@ -35,7 +37,7 @@ func (e *ExitCommand) Exec(args []string) error {
 }
 
 func (e *ExitCommand) Type() string {
-	return "builtin"
+	return builtin
 }
 
 type EchoCommand struct {
@@ -51,7 +53,7 @@ func (e *EchoCommand) Name() string {
 }
 
 func (e *EchoCommand) Type() string {
-	return "builtin"
+	return builtin
 }
 
 func (e *EchoCommand) Exec(args []string) error {
@@ -79,7 +81,7 @@ func (tc *TypeCommand) Name() string {
 }
 
 func (e *TypeCommand) Type() string {
-	return "builtin"
+	return builtin
 }
 
 func (tc *TypeCommand) Exec(_ []string) error {
@@ -114,26 +116,10 @@ func (cd *CdCommand) Name() string {
 }
 
 func (cd *CdCommand) Type() string {
-	return "builtin"
+	return builtin
 }
 
 func (cd *CdCommand) Exec(args []string) error {
-	// Easy mode
-	// var chDir string
-	// if len(args) == 0 || len(args) == 1 && args[0] == "~" {
-	// 	homeFolder := os.Getenv("HOME")
-	// 	if homeFolder == "" {
-	// 		return fmt.Errorf("could not find HOME dir")
-	// 	}
-	// 	chDir = homeFolder
-	// } else {
-	// 	chDir = args[0]
-	// }
-	// err := os.Chdir(chDir)
-	// if err != nil {
-	// 	return fmt.Errorf("cd: %s: No such file or directory", chDir)
-	// }
-	//
 	switch {
 	case len(args) == 0:
 		homeFolder := os.Getenv("HOME")
